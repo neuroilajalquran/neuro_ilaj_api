@@ -1,21 +1,19 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-import base64
+import numpy as np
 
 app = FastAPI()
 
-class EEGFile(BaseModel):
+class EEGRequest(BaseModel):
     filename: str
     content: str
 
 @app.post("/analyze-eeg")
-def analyze_eeg(file: EEGFile):
-    decoded = base64.b64decode(file.content)
-    text_data = decoded.decode("utf-8")
-
-    # Simple EEG logic: count number of lines
-    num_lines = len(text_data.strip().split('\n'))
-
-    return {
-        "summary": f"EEG file '{file.filename}' received. Total lines: {num_lines}."
-    }
+def analyze_eeg(data: EEGRequest):
+    try:
+        values = [float(x.strip()) for x in data.content.split(",")]
+        mean_val = float(np.mean(values))
+        std_val = float(np.std(values))
+        return {"mean": mean_val, "std": std_val}
+    except Exception as e:
+        return {"error": str(e)}
