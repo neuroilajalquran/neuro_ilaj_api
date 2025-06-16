@@ -1,15 +1,21 @@
 from fastapi import FastAPI
-import pandas as pd
+from pydantic import BaseModel
+import base64
 
 app = FastAPI()
 
-@app.get("/")
-def read_root():
-    return {"message": "Neuro Ilaj EEG API running!"}
+class EEGFile(BaseModel):
+    filename: str
+    content: str
 
-@app.post("/analyze/")
-def analyze_eeg(data: dict):
-    # Sample EEG processing
-    df = pd.DataFrame(data)
-    result = df.mean().to_dict()
-    return {"result": result}
+@app.post("/analyze-eeg")
+def analyze_eeg(file: EEGFile):
+    decoded = base64.b64decode(file.content)
+    text_data = decoded.decode("utf-8")
+
+    # Simple EEG logic: count number of lines
+    num_lines = len(text_data.strip().split('\n'))
+
+    return {
+        "summary": f"EEG file '{file.filename}' received. Total lines: {num_lines}."
+    }
