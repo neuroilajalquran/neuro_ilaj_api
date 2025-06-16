@@ -1,8 +1,18 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import numpy as np
 
 app = FastAPI()
+
+# ✅ Add this CORS middleware block
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Use specific domain for production e.g. ["https://yourflutterwebapp.web.app"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 class EEGRequest(BaseModel):
     filename: str
